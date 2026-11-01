@@ -23,36 +23,33 @@ pipeline {
         }
 
         stage('Secret Scan - Filesystem') {
-            steps {
-                sh '''
-                    set -eu
+	    steps {
+		script {
+		    def scanStatus = sh(
+		        script: '''
+		            SCAN_PATH="${WORKSPACE#/var/jenkins_home}"
+		            GITLEAKS_PATH="/jenkins_home${SCAN_PATH}"
 
-                    echo "=== Gitleaks Filesystem Scan ==="
+		            docker run --rm \
+		                -v jenkins_home:/jenkins_home \
+		                zricethezav/gitleaks:latest \
+		                dir "$GITLEAKS_PATH" \
+		                --report-path "$GITLEAKS_PATH/gitleaks-filesystem.json" \
+		                --report-format json \
+		                --redact \
+		                --exit-code 1
+		        ''',
+		        returnStatus: true
+		    )
 
-                    # Workspace Jenkins berada di dalam volume jenkins_home.
-                    case "$WORKSPACE" in
-                        /var/jenkins_home/*)
-                            SCAN_PATH="${WORKSPACE#/var/jenkins_home}"
-                            GITLEAKS_PATH="/jenkins_home${SCAN_PATH}"
-                            ;;
-                        *)
-                            echo "ERROR: Workspace path tidak sesuai."
-                            echo "Workspace: $WORKSPACE"
-                            exit 2
-                            ;;
-                    esac
+		    archiveArtifacts artifacts: 'gitleaks-filesystem.json'
 
-                    docker run --rm \
-                        -v jenkins_home:/jenkins_home \
-                        zricethezav/gitleaks:latest \
-                        dir "$GITLEAKS_PATH" \
-                        --report-path "$GITLEAKS_PATH/gitleaks-filesystem.json" \
-                        --report-format json \
-                        --redact \
-                        --exit-code 1
-                '''
-            }
-        }
+		    if (scanStatus != 0) {
+		        error("Gitleaks scan failed. Exit code: ${scanStatus}")
+		    }
+		}
+	    }
+	}
 
         stage('SonarQube SAST') {
             steps {
