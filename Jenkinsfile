@@ -65,7 +65,8 @@ pipeline {
                             -w "$WORKSPACE" \
                             -e SONAR_HOST_URL="$SONAR_HOST_URL" \
                             -e SONAR_TOKEN="$SONAR_AUTH_TOKEN" \
-                            sonarsource/sonar-scanner-cli
+                            sonarsource/sonar-scanner-cli \
+			    -Dsonar.scanner.metadataFilePath=/var/jenkins_home/workspace/uts_kelompok1/report-task.txt
 
 			ls -l "$WORKSPACE/report-task.txt"
                     '''
