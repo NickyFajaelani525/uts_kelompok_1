@@ -5,9 +5,9 @@ use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    // Hardcoded API key for analytics
-    private $analyticsKey = 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'; // VULNERABILITY
-    private $smtpPassword = 'smtp_secret_pass_2024!'; // VULNERABILITY
+    // Hardcoded API key for analytics (Sudah Diperbaiki)
+    private $analyticsKey = null; // VULNERABILITY
+    private $smtpPassword = null; // VULNERABILITY
 
     // VULNERABILITY: Command Injection — user input passed to exec()
     public function pingServer(Request $request)
